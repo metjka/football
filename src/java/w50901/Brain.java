@@ -1,5 +1,5 @@
 package w50901;//
-//	File:			Brain.java
+//	File:			w50901.Brain.java
 //	Author:		Krzysztof Langner
 //	Date:			1997/04/28
 //
@@ -11,24 +11,9 @@ package w50901;//
 import java.util.regex.Pattern;
 
 class Brain extends Thread implements SensorInput {
-    //---------------------------------------------------------------------------
-    // This constructor:
-    // - stores connection to krislet
-    // - starts thread for this object
-    public Brain(SendCommand krislet,
-                 String team,
-                 char side,
-                 int number,
-                 String playMode) {
-        m_timeOver = false;
-        m_krislet = krislet;
-        m_memory = new Memory();
-        m_team = team;//LG
-        m_side = side;
-        m_number = number;//LG
-        m_playMode = playMode;
-        start();
-    }
+    //===========================================================================
+    // Private members
+    private SendCommand m_krislet;            // robot which is controled by this brain
 
 
     //---------------------------------------------------------------------------
@@ -54,6 +39,38 @@ class Brain extends Thread implements SensorInput {
     // Allways know where the goal is.
     // Move to a place on my side on a kick_off
     // ************************************************
+    private Memory m_memory;                // place where all information is stored
+
+
+    //===========================================================================
+    // Here are suporting functions for implement logic
+
+
+    //===========================================================================
+    // Implementation of w50901.SensorInput Interface
+    private char m_side;
+    volatile private boolean m_timeOver;
+    private String m_playMode;
+    private String m_team;
+    private int m_number;
+    //---------------------------------------------------------------------------
+    // This constructor:
+    // - stores connection to krislet
+    // - starts thread for this object
+    public Brain(SendCommand krislet,
+                 String team,
+                 char side,
+                 int number,
+                 String playMode) {
+        m_timeOver = false;
+        m_krislet = krislet;
+        m_memory = new Memory();
+        m_team = team;//LG
+        m_side = side;
+        m_number = number;//LG
+        m_playMode = playMode;
+        start();
+    }
 
     public void run() {
         ObjectInfo object;
@@ -64,11 +81,11 @@ class Brain extends Thread implements SensorInput {
 
         while (!m_timeOver) {
             object = m_memory.getObject("ball");
-    /*	Vector<ObjectInfo> players= m_memory.getAllObjects("player");
+    /*	Vector<w50901.ObjectInfo> players= m_memory.getAllObjects("player");
         System.out.print("\n"+m_team+" "+m_number+" see:");
-		for(ObjectInfo o:players)
+		for(w50901.ObjectInfo o:players)
 		{
-			PlayerInfo pl=(PlayerInfo)o;
+			w50901.PlayerInfo pl=(w50901.PlayerInfo)o;
 			System.out.print(pl.getTeamName()+" "+pl.getTeamNumber()+",");
 		}*/
 
@@ -110,20 +127,11 @@ class Brain extends Thread implements SensorInput {
         m_krislet.bye();
     }
 
-
-    //===========================================================================
-    // Here are suporting functions for implement logic
-
-
-    //===========================================================================
-    // Implementation of SensorInput Interface
-
     //---------------------------------------------------------------------------
     // This function sends see information
     public void see(VisualInfo info) {
         m_memory.store(info);
     }
-
 
     //---------------------------------------------------------------------------
     // This function receives hear information from player
@@ -137,16 +145,5 @@ class Brain extends Thread implements SensorInput {
             m_timeOver = true;
 
     }
-
-
-    //===========================================================================
-    // Private members
-    private SendCommand m_krislet;            // robot which is controled by this brain
-    private Memory m_memory;                // place where all information is stored
-    private char m_side;
-    volatile private boolean m_timeOver;
-    private String m_playMode;
-    private String m_team;
-    private int m_number;
 
 }

@@ -41,12 +41,12 @@ class PlayerInfo extends ObjectInfo {
         return m_teamName;
     }
 
-    public void setGoalie(boolean goalie) {
-        m_goalie = goalie;
-    }
-
     public boolean isGoalie() {
         return m_goalie;
+    }
+
+    public void setGoalie(boolean goalie) {
+        m_goalie = goalie;
     }
 
     public int getTeamNumber() {

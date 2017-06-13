@@ -1,13 +1,57 @@
-package w50901;//
+package w50901;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.regex.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+
+//***************************************************************************
+//
+//	This is main object class
+//
+//***************************************************************************
 class Krislet implements SendCommand {
     //===========================================================================
     // Initialization member functions
+
+    //private Pattern coach_pattern = Pattern.compile("coach");
+    // constants
+    private static final int MSG_SIZE = 4096;    // Size of socket buffer
+    //===========================================================================
+    // Private members
+    // class members
+    private DatagramSocket m_socket;        // Socket to communicate with server
+    private InetAddress m_host;            // Server address
+
+
+    //===========================================================================
+    // Protected member functions
+    private int m_port;            // server port
+
+
+    //===========================================================================
+    // Implementation of w50901.SendCommand Interface
+    private String m_team;            // team name
+    private SensorInput m_brain;        // input for sensor information
+    private boolean m_playing;              // controls the MainLoop
+    private Pattern message_pattern = Pattern.compile("^\\((\\w+?)\\s.*");
+    private Pattern hear_pattern = Pattern.compile("^\\(hear\\s(\\w+?)\\s(\\w+?)\\s(.*)\\).*");
+
+    //---------------------------------------------------------------------------
+    // This constructor opens socket for  connection with server
+    public Krislet(InetAddress host, int port, String team)
+            throws SocketException {
+        m_socket = new DatagramSocket();
+        m_host = host;
+        m_port = port;
+        m_team = team;
+        m_playing = true;
+    }
 
     //---------------------------------------------------------------------------
     // The main appllication function.
@@ -18,37 +62,21 @@ class Krislet implements SendCommand {
     // Parameters:
     //
     //	host (default "localhost")
-    //		The host name can either be a machine name, such as "java.sun.com" 
+    //		The host name can either be a machine name, such as "java.sun.com"
     //		or a string representing its IP address, such as "206.26.48.100."
     //
     //	port (default 6000)
     //		Port number for communication with server
     //
     //	team (default Kris)
-    //		Team name. This name can not contain spaces.
+    //		w50901.Team name. This name can not contain spaces.
     //
     //
-
-    //===========================================================================
-    // Private members
-    // class members
-    private DatagramSocket m_socket;        // Socket to communicate with server
-    private InetAddress m_host;            // Server address
-    private int m_port;            // server port
-    private String m_team;            // team name
-    private SensorInput m_brain;        // input for sensor information
-    private boolean m_playing;              // controls the MainLoop
-    private Pattern message_pattern = Pattern.compile("^\\((\\w+?)\\s.*");
-    private Pattern hear_pattern = Pattern.compile("^\\(hear\\s(\\w+?)\\s(\\w+?)\\s(.*)\\).*");
-    //private Pattern coach_pattern = Pattern.compile("coach");
-    // constants
-    private static final int MSG_SIZE = 4096;    // Size of socket buffer
-
     public static void main(String a[])
             throws SocketException, IOException {
-        String hostName = "";
+        String hostName = new String("");
         int port = 6000;
-        String team = "Krislet3";
+        String team = new String("Krislet3");
 
         try {
             // First look for parameters
@@ -88,24 +116,10 @@ class Krislet implements SendCommand {
     }
 
     //---------------------------------------------------------------------------
-    // This constructor opens socket for  connection with server
-    public Krislet(InetAddress host, int port, String team) throws SocketException {
-        m_socket = new DatagramSocket();
-        m_host = host;
-        m_port = port;
-        m_team = team;
-        m_playing = true;
-    }
-
-    //---------------------------------------------------------------------------
     // This destructor closes socket to server
-    public void close() {
+    public void finalize() {
         m_socket.close();
     }
-
-
-    //===========================================================================
-    // Protected member functions
 
     //---------------------------------------------------------------------------
     // This is main loop for player
@@ -122,16 +136,10 @@ class Krislet implements SendCommand {
 
         // Now we should be connected to the server
         // and we know side, player number and play mode
-        String receive = receive();
-        while (m_playing) {
-            parseSensorInformation(receive);
-        }
-        close();
+        while (m_playing)
+            parseSensorInformation(receive());
+        finalize();
     }
-
-
-    //===========================================================================
-    // Implementation of SendCommand Interface
 
     //---------------------------------------------------------------------------
     // This function sends move command to the server
@@ -154,6 +162,8 @@ class Krislet implements SendCommand {
     public void dash(double power) {
         send("(dash " + Double.toString(power) + ")");
     }
+
+    //---------------------------------------------------------------------------
 
     //---------------------------------------------------------------------------
     // This function sends kick command to the server
@@ -197,7 +207,6 @@ class Krislet implements SendCommand {
                 m.group(3));
     }
 
-
     //===========================================================================
     // Here comes collection of communication function
     //---------------------------------------------------------------------------
@@ -208,10 +217,8 @@ class Krislet implements SendCommand {
 
     //---------------------------------------------------------------------------
     // This function parses sensor information
-    private void parseSensorInformation(String message) throws IOException {
-
-
-        System.out.println(message);
+    private void parseSensorInformation(String message)
+            throws IOException {
         // First check kind of information
         Matcher m = message_pattern.matcher(message);
         if (!m.matches()) {
@@ -224,7 +231,6 @@ class Krislet implements SendCommand {
         } else if (m.group(1).compareTo("hear") == 0)
             parseHear(message);
     }
-
 
     //---------------------------------------------------------------------------
     // This function parses hear information
@@ -249,7 +255,6 @@ class Krislet implements SendCommand {
             m_brain.hear(time, Integer.parseInt(sender), uttered);
     }
 
-
     //---------------------------------------------------------------------------
     // This function sends via socket message to the server
     private void send(String message) {
@@ -262,8 +267,6 @@ class Krislet implements SendCommand {
         }
 
     }
-
-    //---------------------------------------------------------------------------
 
     // This function waits for new message from server
     private String receive() {
@@ -278,6 +281,5 @@ class Krislet implements SendCommand {
         }
         return new String(buffer);
     }
-
 
 }

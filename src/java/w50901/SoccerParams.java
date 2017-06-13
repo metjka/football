@@ -1,5 +1,5 @@
 package w50901;//
-//	File:			SoccerParams.java
+//	File:			w50901.SoccerParams.java
 //	Author:		Krzysztof Langner
 //	Date:			1997/04/28
 //

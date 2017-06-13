@@ -1,16 +1,14 @@
 package w50901;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.Arrays;
-import java.util.Vector;
 
 
 public class Team {
 
     public static void main(String[] args) {
         // TODO Auto-generated method stub
-        //Vector<Krislet> players=new
+        //Vector<w50901.Krislet> players=new
 
         String[] args2 = new String[args.length > 0 ? args.length - 1 : 0];
         int n = 4;

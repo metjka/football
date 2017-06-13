@@ -13,5 +13,4 @@ class BallInfo extends ObjectInfo {
     public BallInfo() {
         super("ball");
     }
-
 }

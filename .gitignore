@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+#.gitignore
+.idea/
+Krislet0.jar
+out/
+rcssmonitor-14.1.0-win/
+rcssserver-15.0.0-win/
+src/res/

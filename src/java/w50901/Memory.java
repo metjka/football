@@ -3,18 +3,22 @@ package w50901;
 import java.util.Vector;
 
 //
-//	File:			Memory.java
+//	File:			w50901.Memory.java
 //	Author:		Krzysztof Langner
 //	Date:			1997/04/28
 //
 
 class Memory {
+    final static int SIMULATOR_STEP = 100;
+    //===========================================================================
+    // Private members
+    volatile private VisualInfo m_info;    // place where all information is stored
+
     //---------------------------------------------------------------------------
     // This constructor:
     // - initializes all variables
     public Memory() {
     }
-
 
     //---------------------------------------------------------------------------
     // This function puts see information into our memory
@@ -65,11 +69,5 @@ class Memory {
             }
         }
     }
-
-
-    //===========================================================================
-    // Private members
-    volatile private VisualInfo m_info;    // place where all information is stored
-    final static int SIMULATOR_STEP = 100;
 }
 

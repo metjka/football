@@ -1,4 +1,20 @@
 package w50901;//
+//	File:			w50901.VisualInfo.java
+//	Author:		Krzysztof Langner
+//	Date:			1997/04/28
+
+//  Modified by:  Paul Marlow, Amir Ghavam, Yoga Selvaraj
+//  Course:       Software Agents
+//  Date Due:     November 30, 2000 
+
+//  Modified by:  Tarek Hassan
+//  Date:         015 June 2001
+
+//  Modified by:	Paul Marlow
+//  Date:		February 22, 2004
+
+//  Modified by:	Edgar Acosta
+//  Date:		March 5, 2008
 
 import java.io.IOException;
 import java.util.Vector;
@@ -6,32 +22,32 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class VisualInfo {
-
-    private static Pattern m_info_p = Pattern.compile("\\s");
     private static final int p_flags = Pattern.CASE_INSENSITIVE;
+    //===========================================================================
+    // Private members
+    private static Pattern m_info_p = Pattern.compile("\\s");
     private static Pattern p_player = Pattern.compile("^(player|p)$", p_flags);
     private static Pattern p_ball = Pattern.compile("^(ball|b)$", p_flags);
     private static Pattern p_goal = Pattern.compile("^(goal|g)$", p_flags);
     private static Pattern p_flag = Pattern.compile("^(flag|f)$", p_flags);
     private static Pattern p_line = Pattern.compile("^(line|l)$", p_flags);
     private static Pattern p_quote = Pattern.compile("\"");
-    private static Pattern p_type = Pattern.compile("^([pg])$");
+    private static Pattern p_type = Pattern.compile("^(p|g)$");
     private static Pattern p_number = Pattern.compile("^\\d{2}$");
-    private static Pattern p_lr = Pattern.compile("^([lr])$");
-    private static Pattern p_lrc = Pattern.compile("^([lrc])$");
-
-
-    private int m_time;
+    private static Pattern p_lr = Pattern.compile("^(l|r)$");
+    private static Pattern p_lrc = Pattern.compile("^(l|r|c)$");
     public Vector<ObjectInfo> m_objects;
     public String m_message;
-
+    private int m_time;
     // Split objects into specific lists
     private Vector<?> m_ball_list;
+
+    //===========================================================================
+    // Private implementations
     private Vector<?> m_player_list;
     private Vector<?> m_flag_list;
     private Vector<?> m_goal_list;
     private Vector<?> m_line_list;
-
     // Constructor for 'see' information
     public VisualInfo(String info) {
         info.trim();
@@ -129,9 +145,6 @@ class VisualInfo {
         }
     }
 
-    //===========================================================================
-    // Private implementations
-
     //---------------------------------------------------------------------------
     // This function creates new object based on the see message sent from the
     // server
@@ -155,7 +168,7 @@ class VisualInfo {
                 case 3:
                     uniformNumber = Integer.parseInt(objectName[2]); //if the player number is available
                 case 2:
-                    team = p_quote.matcher(objectName[1]).replaceAll(""); //Team Name (remove quotation marks)
+                    team = p_quote.matcher(objectName[1]).replaceAll(""); //w50901.Team Name (remove quotation marks)
                     objInfo = new PlayerInfo(team, uniformNumber, goalie);
                     break;
                 default:
@@ -245,7 +258,5 @@ class VisualInfo {
         }
         return objInfo;
     }
-
-
 }
 

@@ -1,5 +1,5 @@
 package w50901;//
-//	File:			ObjectInfo.java
+//	File:			w50901.ObjectInfo.java
 //	Author:		Krzysztof Langner
 //	Date:			1997/04/28
 
