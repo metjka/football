@@ -135,7 +135,7 @@ class VisualInfo {
                 case 3:
                     objInfo.m_distChange = Float.valueOf(relPos[2]).floatValue();
                 case 2:
-                    objInfo.m_distance = Float.valueOf(relPos[0]).floatValue();
+                    objInfo.distance = Float.valueOf(relPos[0]).floatValue();
                     objInfo.m_direction = Float.valueOf(relPos[1]).floatValue();
                     break;
                 default:

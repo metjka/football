@@ -117,7 +117,7 @@ class Krislet implements SendCommand {
 
     //---------------------------------------------------------------------------
     // This destructor closes socket to server
-    public void finalize() {
+    public void close() {
         m_socket.close();
     }
 
@@ -136,9 +136,10 @@ class Krislet implements SendCommand {
 
         // Now we should be connected to the server
         // and we know side, player number and play mode
-        while (m_playing)
+        while (m_playing) {
             parseSensorInformation(receive());
-        finalize();
+        }
+        close();
     }
 
     //---------------------------------------------------------------------------

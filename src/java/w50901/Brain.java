@@ -8,12 +8,16 @@ package w50901;//
 //    Modified by:      Edgar Acosta
 //    Date:             March 4, 2008
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 class Brain extends Thread implements SensorInput {
     //===========================================================================
     // Private members
-    private SendCommand m_krislet;            // robot which is controled by this brain
+    private SendCommand krislet;            // robot which is controled by this brain
 
 
     //---------------------------------------------------------------------------
@@ -39,7 +43,7 @@ class Brain extends Thread implements SensorInput {
     // Allways know where the goal is.
     // Move to a place on my side on a kick_off
     // ************************************************
-    private Memory m_memory;                // place where all information is stored
+    private Memory memory;                // place where all information is stored
 
 
     //===========================================================================
@@ -53,6 +57,7 @@ class Brain extends Thread implements SensorInput {
     private String m_playMode;
     private String m_team;
     private int m_number;
+
     //---------------------------------------------------------------------------
     // This constructor:
     // - stores connection to krislet
@@ -63,8 +68,8 @@ class Brain extends Thread implements SensorInput {
                  int number,
                  String playMode) {
         m_timeOver = false;
-        m_krislet = krislet;
-        m_memory = new Memory();
+        this.krislet = krislet;
+        memory = new Memory();
         m_team = team;//LG
         m_side = side;
         m_number = number;//LG
@@ -73,48 +78,79 @@ class Brain extends Thread implements SensorInput {
     }
 
     public void run() {
-        ObjectInfo object;
 
         // first put it somewhere on my side
         if (Pattern.matches("^before_kick_off.*", m_playMode))
-            m_krislet.move(-Math.random() * 52.5, 34 - Math.random() * 68.0);
-
+            krislet.move(-Math.random() * 52.5, 34 - Math.random() * 68.0);
         while (!m_timeOver) {
-            object = m_memory.getObject("ball");
-    /*	Vector<w50901.ObjectInfo> players= m_memory.getAllObjects("player");
-        System.out.print("\n"+m_team+" "+m_number+" see:");
-		for(w50901.ObjectInfo o:players)
-		{
-			w50901.PlayerInfo pl=(w50901.PlayerInfo)o;
-			System.out.print(pl.getTeamName()+" "+pl.getTeamNumber()+",");
-		}*/
 
-            if (object == null) {
+            // We know where is ball and we can kick it
+            // so look for goal
+            GoalInfo gates = null;
+            if (m_side == 'l') {
+                gates = (GoalInfo) memory.getObject("goal r");
+            } else {
+                gates = (GoalInfo) memory.getObject("goal l");
+            }
+            BallInfo ball = (BallInfo) memory.getObject("ball");
+
+            List<PlayerInfo> players = memory.getAllObjects("player").stream()
+                    .map(objectInfo -> ((PlayerInfo) objectInfo))
+                    .collect(Collectors.toList());
+
+            List<ObjectInfo> team = players.stream()
+                    .filter(playerInfo -> Objects.equals(playerInfo.getTeamName(), this.m_team))
+                    .collect(Collectors.toList());
+
+//            System.out.print("\n" + m_team + " " + m_number + " see:");
+            for (ObjectInfo o : players) {
+                PlayerInfo pl = (PlayerInfo) o;
+//                System.out.print(pl.getTeamName() + " " + pl.getTeamNumber() + ",");
+            }
+
+            if (ball == null) {
                 // If you don't know where is ball then find it
-                m_krislet.turn(40);
-                m_memory.waitForNewInfo();
-            } else if (object.m_distance > 1.0) {
+                krislet.turn(40);
+                memory.waitForNewInfo();
+            } else if (ball.distance > 1.0) {
                 // If ball is too far then
                 // turn to ball or
                 // if we have correct direction then go to ball
-                if (object.m_direction != 0)
-                    m_krislet.turn(object.m_direction);
-                else
-                    m_krislet.dash(10 * object.m_distance);
-            } else {
-                {
-                    // We know where is ball and we can kick it
-                    // so look for goal
-                    if (m_side == 'l')
-                        object = m_memory.getObject("goal r");
-                    else
-                        object = m_memory.getObject("goal l");
+                if (ball.m_direction != 0) {
+                    krislet.turn(ball.m_direction);
+                } else {
 
-                    if (object == null) {
-                        m_krislet.turn(40);
-                        m_memory.waitForNewInfo();
-                    } else
-                        m_krislet.kick(100, object.m_direction);
+                    krislet.dash(100 * ball.distance);
+
+                }
+            } else {
+
+
+                if (gates == null) {
+                    krislet.turn(40);
+                    memory.waitForNewInfo();
+                } else {
+
+                    if (gates.distance <= 30) {
+                        krislet.kick(100, gates.m_direction);
+                    } else if (gates.distance < 45) {
+                        krislet.kick(30, gates.m_direction);
+                    } else if (gates.distance < 60) {
+                        //pass
+                        Optional<ObjectInfo> first = team.stream()
+                                .findFirst();
+                        if (first.isPresent()) {
+                            if (first.get().distance > 20) {
+
+                                krislet.kick(40, first.get().m_direction);
+                            } else {
+                                krislet.kick(30, gates.m_direction);
+                            }
+                        } else {
+                            krislet.kick(30, gates.m_direction);
+                        }
+
+                    }
                 }
             }
             // sleep one step to ensure that we will not send
@@ -124,18 +160,19 @@ class Brain extends Thread implements SensorInput {
             } catch (Exception e) {
             }
         }
-        m_krislet.bye();
+        krislet.bye();
     }
 
     //---------------------------------------------------------------------------
     // This function sends see information
     public void see(VisualInfo info) {
-        m_memory.store(info);
+        memory.store(info);
     }
 
     //---------------------------------------------------------------------------
     // This function receives hear information from player
     public void hear(int time, int direction, String message) {
+
     }
 
     //---------------------------------------------------------------------------

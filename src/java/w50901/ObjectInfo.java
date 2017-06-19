@@ -18,7 +18,7 @@ package w50901;//
 //***************************************************************************
 class ObjectInfo {
     public String m_type;
-    public float m_distance;
+    public float distance;
     public float m_direction;
     public float m_distChange;
     public float m_dirChange;
@@ -30,7 +30,7 @@ class ObjectInfo {
     }
 
     public float getDistance() {
-        return m_distance;
+        return distance;
     }
 
     public float getDirection() {
