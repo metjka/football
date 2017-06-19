@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,7 @@ class Krislet implements SendCommand {
     private DatagramSocket m_socket;        // Socket to communicate with server
     private InetAddress m_host;            // Server address
 
+    Random random = new Random();
 
     //===========================================================================
     // Protected member functions
@@ -159,8 +161,8 @@ class Krislet implements SendCommand {
     }
 
     //---------------------------------------------------------------------------
-    // This function sends dash command to the server
-    public void dash(double power) {
+    // This function sends runTo command to the server
+    public void runTo(double power) {
         send("(dash " + Double.toString(power) + ")");
     }
 

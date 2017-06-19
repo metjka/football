@@ -11,6 +11,7 @@ package w50901;//
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ class Brain extends Thread implements SensorInput {
     //		2.1. If we are directed towards the ball then go to the ball
     //		2.2. else turn to the ball
     //
-    //	3. If we dont know where is opponent goal then turn wait 
+    //	3. If we dont know where is opponent goal then turn wait
     //				and wait for new info
     //
     //	4. Kick ball
@@ -46,6 +47,7 @@ class Brain extends Thread implements SensorInput {
     private Memory memory;                // place where all information is stored
 
 
+    Random random = new Random();
     //===========================================================================
     // Here are suporting functions for implement logic
 
@@ -98,60 +100,17 @@ class Brain extends Thread implements SensorInput {
                     .map(objectInfo -> ((PlayerInfo) objectInfo))
                     .collect(Collectors.toList());
 
-            List<ObjectInfo> team = players.stream()
+            List<PlayerInfo> team = players.stream()
                     .filter(playerInfo -> Objects.equals(playerInfo.getTeamName(), this.m_team))
                     .collect(Collectors.toList());
 
-//            System.out.print("\n" + m_team + " " + m_number + " see:");
-            for (ObjectInfo o : players) {
-                PlayerInfo pl = (PlayerInfo) o;
-//                System.out.print(pl.getTeamName() + " " + pl.getTeamNumber() + ",");
-            }
-
             if (ball == null) {
-                // If you don't know where is ball then find it
                 krislet.turn(40);
                 memory.waitForNewInfo();
             } else if (ball.distance > 1.0) {
-                // If ball is too far then
-                // turn to ball or
-                // if we have correct direction then go to ball
-                if (ball.m_direction != 0) {
-                    krislet.turn(ball.m_direction);
-                } else {
-
-                    krislet.dash(100 * ball.distance);
-
-                }
+                runToBall(ball);
             } else {
-
-
-                if (gates == null) {
-                    krislet.turn(40);
-                    memory.waitForNewInfo();
-                } else {
-
-                    if (gates.distance <= 30) {
-                        krislet.kick(100, gates.m_direction);
-                    } else if (gates.distance < 45) {
-                        krislet.kick(30, gates.m_direction);
-                    } else if (gates.distance < 60) {
-                        //pass
-                        Optional<ObjectInfo> first = team.stream()
-                                .findFirst();
-                        if (first.isPresent()) {
-                            if (first.get().distance > 20) {
-
-                                krislet.kick(40, first.get().m_direction);
-                            } else {
-                                krislet.kick(30, gates.m_direction);
-                            }
-                        } else {
-                            krislet.kick(30, gates.m_direction);
-                        }
-
-                    }
-                }
+                kickBall(gates, players, team);
             }
             // sleep one step to ensure that we will not send
             // two commands in one cycle.
@@ -161,6 +120,48 @@ class Brain extends Thread implements SensorInput {
             }
         }
         krislet.bye();
+    }
+
+    private void runToBall(BallInfo ball) {
+        if (ball.m_direction != 0) {
+            krislet.turn(ball.m_direction);
+        } else {
+            krislet.runTo(10 * ball.distance);
+        }
+    }
+
+    private void kickBall(GoalInfo gates, List<PlayerInfo> players, List<PlayerInfo> team) {
+        if (gates == null) {
+            krislet.turn(40);
+            memory.waitForNewInfo();
+        } else {
+
+            if (gates.distance <= 30) {
+                krislet.kick(100, gates.m_direction);
+            } else if (gates.distance < 45) {
+                if (players.size() - team.size() > 1) {
+                    krislet.kick(30, gates.m_direction);
+                } else {
+                    krislet.turn(30);
+                }
+            } else if (gates.distance < 60) {
+                //pass
+                Optional<PlayerInfo> first = team.stream()
+                        .findFirst();
+                if (first.isPresent()) {
+                    if (first.get().distance > 10) {
+                        krislet.kick(40, first.get().m_direction);
+                    } else {
+                        krislet.kick(30, gates.m_direction);
+                    }
+                } else {
+                    krislet.turn_neck(random.nextInt(30) - random.nextInt(30));
+                    memory.waitForNewInfo();
+                    krislet.kick(30, gates.m_direction);
+                }
+
+            }
+        }
     }
 
     //---------------------------------------------------------------------------

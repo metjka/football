@@ -24,8 +24,8 @@ interface SendCommand {
 
     void turn_neck(double moment);
 
-    // This function sends dash command to the server
-    void dash(double power);
+    // This function sends runTo command to the server
+    void runTo(double power);
 
     // This function sends kick command to the server
     void kick(double power, double direction);
