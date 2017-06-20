@@ -126,7 +126,7 @@ class Brain extends Thread implements SensorInput {
         if (ball.m_direction != 0) {
             krislet.turn(ball.m_direction);
         } else {
-            krislet.runTo(10 * ball.distance);
+            krislet.runTo(50000 * ball.distance);
         }
     }
 
@@ -137,27 +137,25 @@ class Brain extends Thread implements SensorInput {
         } else {
 
             if (gates.distance <= 30) {
-                krislet.kick(100, gates.m_direction);
-            } else if (gates.distance < 45) {
-                if (players.size() - team.size() > 1) {
+                krislet.kick(200, gates.m_direction);
+            } else if (gates.distance < 40) {
+                if (players.size() - team.size() > 2) {
                     krislet.kick(30, gates.m_direction);
                 } else {
                     krislet.turn(30);
                 }
-            } else if (gates.distance < 60) {
+            } else if (gates.distance < 50) {
                 //pass
                 Optional<PlayerInfo> first = team.stream()
                         .findFirst();
                 if (first.isPresent()) {
-                    if (first.get().distance > 10) {
+                    if (first.get().distance > 5) {
                         krislet.kick(40, first.get().m_direction);
                     } else {
                         krislet.kick(30, gates.m_direction);
                     }
                 } else {
-                    krislet.turn_neck(random.nextInt(30) - random.nextInt(30));
-                    memory.waitForNewInfo();
-                    krislet.kick(30, gates.m_direction);
+                    krislet.kick(200, gates.m_direction);
                 }
 
             }

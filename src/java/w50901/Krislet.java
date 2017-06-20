@@ -71,7 +71,7 @@ class Krislet implements SendCommand {
     //		Port number for communication with server
     //
     //	team (default Kris)
-    //		w50901.Team name. This name can not contain spaces.
+    //		w50901.old.Team name. This name can not contain spaces.
     //
     //
     public static void main(String a[])
